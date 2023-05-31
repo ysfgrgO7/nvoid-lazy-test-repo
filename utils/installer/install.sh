@@ -387,8 +387,8 @@ function verify_nvoid_dirs() {
 
 function clone_nvoid() {
   msg "Cloning Nvoid configuration"
-  if ! git clone \
-    "https://github.com/${LV_REMOTE}" "$NVOID_BASE_DIR"; then
+  mkdir ~/.local/share/nvoid
+  if ! git clone  "https://github.com/ysfgrgO7/nvoid-lazy-test-repo "$NVOID_BASE_DIR"; then
     echo "Failed to clone repository. Installation failed."
     exit 1
   fi
