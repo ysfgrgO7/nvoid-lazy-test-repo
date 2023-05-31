@@ -4,7 +4,7 @@ set -eo pipefail
 OS="$(uname -s)"
 
 #Set branch to master unless specified by the user
-declare -x LV_BRANCH="${LV_BRANCH:-"main"}"
+# declare -x LV_BRANCH="${LV_BRANCH:-"main"}"
 declare -xr LV_REMOTE="${LV_REMOTE:-ysfgrgO7/nvoid-lazy-test-repo.git}"
 declare -xr INSTALL_PREFIX="${INSTALL_PREFIX:-"$HOME/.local"}"
 
@@ -387,7 +387,7 @@ function verify_nvoid_dirs() {
 
 function clone_nvoid() {
   msg "Cloning Nvoid configuration"
-  if ! git clone --branch "$LV_BRANCH" \
+  if ! git clone --branch \
     "https://github.com/${LV_REMOTE}" "$NVOID_BASE_DIR"; then
     echo "Failed to clone repository. Installation failed."
     exit 1
