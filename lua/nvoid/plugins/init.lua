@@ -6,13 +6,13 @@ local core_plugins = {
   { "nvim-lua/plenary.nvim" },
 
   -- Base16
-  {
-    "nvoid-lua/base16",
-    branch = "nvoid-rolling",
-    config = function()
-      require("base16").load_theme()
-    end,
-  },
+  -- {
+  --   "nvoid-lua/base16",
+  --   branch = "nvoid-rolling",
+  --   config = function()
+  --     require("base16").load_theme()
+  --   end,
+  -- },
   {
     "SmiteshP/nvim-navic",
     requires = "neovim/nvim-lspconfig",
@@ -178,7 +178,7 @@ local core_plugins = {
   -- Alpha
   {
     "goolord/alpha-nvim",
-    after = "base16",
+    -- after = "base16",
     config = function()
       require("nvoid.plugins.config.alpha")
     end,

@@ -1,5 +1,5 @@
 -- Ui
-nvoid.colorscheme = "onedarker"
+-- nvoid.colorscheme = "onedarker"
 -- nvoid.statusline. ...
 
 -- Log

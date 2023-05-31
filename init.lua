@@ -25,4 +25,4 @@ commands.load(commands.defaults)
 require("nvoid.lsp").setup()
 
 -- Terminals, Statusline
-require("nvoid.builtin")
+-- require("nvoid.builtin")
