@@ -4,7 +4,7 @@ set -eo pipefail
 OS="$(uname -s)"
 
 #Set branch to master unless specified by the user
-# declare -x LV_BRANCH="${LV_BRANCH:-"main"}"
+declare -x LV_BRANCH="${LV_BRANCH:-"main"}"
 declare -xr LV_REMOTE="${LV_REMOTE:-ysfgrgO7/nvoid-lazy-test-repo.git}"
 declare -xr INSTALL_PREFIX="${INSTALL_PREFIX:-"$HOME/.local"}"
 
@@ -387,8 +387,8 @@ function verify_nvoid_dirs() {
 
 function clone_nvoid() {
   msg "Cloning Nvoid configuration"
-  mkdir ~/.local/share/nvoid
-  if ! git clone  "https://github.com/ysfgrgO7/nvoid-lazy-test-repo "$NVOID_BASE_DIR"; then
+  if ! git clone --branch "$LV_BRANCH" \
+    "https://github.com/${LV_REMOTE}" "$NVOID_BASE_DIR"; then
     echo "Failed to clone repository. Installation failed."
     exit 1
   fi
@@ -452,3 +452,20 @@ function create_desktop_file() {
 
   xdg-desktop-menu install --novendor "$NVOID_BASE_DIR/utils/desktop/nvoid.desktop" || true
 }
+
+function print_logo() {
+  cat <<'EOF'
+
+      88\                                                   88\
+      88 |                                                  \__|
+      88 |88\   88\ 888888$\   888888\   888888\ 88\    88\ 88\ 888888\8888\
+      88 |88 |  88 |88  __88\  \____88\ 88  __88\\88\  88  |88 |88  _88  _88\
+      88 |88 |  88 |88 |  88 | 888888$ |88 |  \__|\88\88  / 88 |88 / 88 / 88 |
+      88 |88 |  88 |88 |  88 |88  __88 |88 |       \88$  /  88 |88 | 88 | 88 |
+      88 |\888888  |88 |  88 |\888888$ |88 |        \$  /   88 |88 | 88 | 88 |
+      \__| \______/ \__|  \__| \_______|\__|         \_/    \__|\__| \__| \__|
+
+EOF
+}
+
+main "$@"
