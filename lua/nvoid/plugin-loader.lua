@@ -44,8 +44,7 @@ function plugin_loader.init(opts)
   vim.opt.runtimepath:append(lazy_install_dir)
   vim.opt.runtimepath:append(join_paths(plugins_dir, "*"))
 
-  local lazy_cache = require "lazy.core.cache"
-  lazy_cache.setup {
+  require("lazy.core.cache").setup {
     performance = {
       cache = {
         enabled = true,
@@ -54,7 +53,7 @@ function plugin_loader.init(opts)
     },
   }
   -- HACK: Don't allow lazy to call setup second time
-  lazy_cache.setup = function() end
+  require("lazy.core.cache").setup = function() end
 end
 
 function plugin_loader.reset_cache()

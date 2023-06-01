@@ -56,9 +56,9 @@ local core_plugins = {
   -- Colorizer
   {
     "norcalli/nvim-colorizer.lua",
-    setup = function()
-      require("nvoid.core.lazy_load").on_file_open("nvim-colorizer.lua")
-    end,
+    -- setup = function()
+    --   require("nvoid.core.lazy_load").on_file_open("nvim-colorizer.lua")
+    -- end,
     opt = true,
     config = function()
       require("nvoid.plugins.config.colorizer")
@@ -69,10 +69,10 @@ local core_plugins = {
   {
     "nvim-treesitter/nvim-treesitter",
     module = "nvim-treesitter",
-    setup = function()
-      require("nvoid.core.lazy_load").on_file_open("nvim-treesitter")
-    end,
-    cmd = require("nvoid.core.lazy_load").treesitter_cmds,
+    -- setup = function()
+    --   require("nvoid.core.lazy_load").on_file_open("nvim-treesitter")
+    -- end,
+    -- cmd = require("nvoid.core.lazy_load").treesitter_cmds,
     run = ":TSUpdate",
     config = function()
       require("nvoid.plugins.config.treesitter").setup()
@@ -86,14 +86,15 @@ local core_plugins = {
     config = function()
       require("nvoid.plugins.config.gitsigns").setup()
     end,
-    setup = function()
-      require("nvoid.core.lazy_load").gitsigns()
-    end,
+    -- setup = function()
+    --   require("nvoid.core.lazy_load").gitsigns()
+    -- end,
   },
 
   -- Lsp, cmp and luadev
   {
     "neovim/nvim-lspconfig",
+    lazy = true,
     dependencies = { "mason-lspconfig.nvim", "nlsp-settings.nvim" }
   },
   {
@@ -104,9 +105,10 @@ local core_plugins = {
       settings.current.automatic_installation = false
     end,
     dependencies = "mason.nvim",
+    lazy = true,
   },
-  { "tamago324/nlsp-settings.nvim",   cmd = "LspSettings" },
-  { "jose-elias-alvarez/null-ls.nvim" },
+  { "tamago324/nlsp-settings.nvim",    cmd = "LspSettings", lazy = true, },
+  { "jose-elias-alvarez/null-ls.nvim", lazy = true, },
   {
     "williamboman/mason.nvim",
     config = function()
@@ -117,10 +119,12 @@ local core_plugins = {
         require("mason-registry").refresh()
       end)
     end,
+    lazy = true,
   },
   { "rafamadriz/friendly-snippets", module = { "cmp", "cmp_nvim_lsp" }, event = "InsertEnter" },
   {
     "folke/neodev.nvim",
+    lazy = true,
     module = "neodev",
   },
   {
@@ -144,6 +148,9 @@ local core_plugins = {
     config = function()
       local utils = require "nvoid.utils"
       local paths = {}
+      if nvoid.builtin.luasnip.sources.friendly_snippets then
+        paths[#paths + 1] = utils.join_paths(get_runtime_dir(), "site", "pack", "lazy", "opt", "friendly-snippets")
+      end
       local user_snippets = utils.join_paths(get_config_dir(), "snippets")
       if utils.is_directory(user_snippets) then
         paths[#paths + 1] = user_snippets
@@ -155,15 +162,16 @@ local core_plugins = {
       require("luasnip.loaders.from_snipmate").lazy_load()
     end,
     event = "InsertEnter",
-    wants = "friendly-snippets",
-    after = "nvim-cmp",
+    dependencies = {
+      "friendly-snippets",
+    },
   },
 
   -- CMP Extensions
-  { "saadparwaiz1/cmp_luasnip",     after = "LuaSnip" },
-  { "hrsh7th/cmp-nvim-lsp",         after = "cmp_luasnip" },
-  { "hrsh7th/cmp-buffer",           after = "cmp-nvim-lsp" },
-  { "hrsh7th/cmp-path",             after = "cmp-buffer" },
+  { "saadparwaiz1/cmp_luasnip",     after = "LuaSnip",                  lazy = true, },
+  { "hrsh7th/cmp-nvim-lsp",         after = "cmp_luasnip",              lazy = true, },
+  { "hrsh7th/cmp-buffer",           after = "cmp-nvim-lsp",             lazy = true, },
+  { "hrsh7th/cmp-path",             after = "cmp-buffer",               lazy = true, },
 
   -- Autopairs
   {
@@ -176,13 +184,13 @@ local core_plugins = {
   },
 
   -- Alpha
-  {
-    "goolord/alpha-nvim",
-    -- after = "base16",
-    config = function()
-      require("nvoid.plugins.config.alpha")
-    end,
-  },
+  -- {
+  --   "goolord/alpha-nvim",
+  --   -- after = "base16",
+  --   config = function()
+  --     require("nvoid.plugins.config.alpha")
+  --   end,
+  -- },
 
   -- Comments
   {
@@ -196,7 +204,7 @@ local core_plugins = {
   {
     "kyazdani42/nvim-tree.lua",
     disable = not nvoid.builtin.nvimtree.active,
-    ft = "alpha",
+    -- ft = "alpha",
     cmd = { "NvimTreeToggle", "NvimTreeFocus" },
     tag = "nightly",
     config = function()
@@ -211,6 +219,7 @@ local core_plugins = {
     config = function()
       require("nvoid.plugins.config.telescope").setup()
     end,
+    lazy = true,
     disable = not nvoid.builtin.telescope.active,
   },
 
@@ -234,5 +243,28 @@ local core_plugins = {
     disable = not nvoid.builtin.notify.active or not nvoid.builtin.telescope.active,
   },
 }
+
+local default_snapshot_path = join_paths(get_nvoid_base_dir(), "snapshots", "default.json")
+local content = vim.fn.readfile(default_snapshot_path)
+local default_sha1 = assert(vim.fn.json_decode(content))
+
+-- taken form <https://github.com/folke/lazy.nvim/blob/c7122d64cdf16766433588486adcee67571de6d0/lua/lazy/core/plugin.lua#L27>
+local get_short_name = function(long_name)
+  local name = long_name:sub(-4) == ".git" and long_name:sub(1, -5) or long_name
+  local slash = name:reverse():find("/", 1, true) --[[@as number?]]
+  return slash and name:sub(#name - slash + 2) or long_name:gsub("%W+", "_")
+end
+
+local get_default_sha1 = function(spec)
+  local short_name = get_short_name(spec[1])
+  return default_sha1[short_name] and default_sha1[short_name].commit
+end
+
+if not vim.env.NVOID_DEV_MODE then
+  --  Manually lock the commit hashes of core plugins
+  for _, spec in ipairs(core_plugins) do
+    spec["commit"] = get_default_sha1(spec)
+  end
+end
 
 return core_plugins
