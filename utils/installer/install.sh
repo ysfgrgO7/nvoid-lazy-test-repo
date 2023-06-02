@@ -430,7 +430,6 @@ function setup_nvoid() {
 
   setup_shim
 
-  create_desktop_file
 
   [ ! -f "$NVOID_CONFIG_DIR/config.lua" ] \
     && cp "$NVOID_BASE_DIR/utils/installer/config.example.lua" "$NVOID_CONFIG_DIR/config.lua"
@@ -442,20 +441,6 @@ function setup_nvoid() {
   printf "\nLazy setup complete"
 
   verify_core_plugins
-}
-
-function create_desktop_file() {
-  # TODO: Any other OSes that use desktop files?
-  ([ "$OS" != "Linux" ] || ! command -v xdg-desktop-menu &>/dev/null) && return
-  echo "Creating desktop file"
-
-  for d in "$NVOID_BASE_DIR"/utils/desktop/*/; do
-    size_folder=$(basename "$d")
-    mkdir -p "$XDG_DATA_HOME/icons/hicolor/$size_folder/apps/"
-    cp "$NVOID_BASE_DIR/utils/desktop/$size_folder/nvoid.svg" "$XDG_DATA_HOME/icons/hicolor/$size_folder/apps"
-  done
-
-  xdg-desktop-menu install --novendor "$NVOID_BASE_DIR/utils/desktop/nvoid.desktop" || true
 }
 
 function print_logo() {
