@@ -25,7 +25,7 @@ function M.get_sections()
     },
   }
 
-  local text = require "nvoid.interface.text"
+  local text = require "nvoid.ui.text"
 
   local footer = {
     type = "text",

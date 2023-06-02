@@ -3,6 +3,24 @@ return {
   reload_config_on_save = true,
   colorscheme = "lunar",
   transparent_window = false,
+  ui = {
+    theme        = "onedark",
+    transparency = false,
+    statusline   = {
+      enabled = true,
+      config = "%!v:lua.require('nvoid.ui.statusline').run()",
+      style = "nvoid"
+    },
+  },
+  terminal = {
+    behavior = {
+      close_on_exit = true,
+    },
+    window = {
+      vsplit_ratio = 0.5,
+      split_ratio = 0.3,
+    },
+  },
   format_on_save = {
     ---@usage boolean: format on save (Default: false)
     enabled = false,

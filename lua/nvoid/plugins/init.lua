@@ -6,6 +6,12 @@ local core_plugins = {
     dependencies = { "mason-lspconfig.nvim", "nlsp-settings.nvim" },
   },
   {
+    "nvoid-lua/base16",
+    config = function()
+      require("base16").load_theme()
+    end,
+  },
+  {
     "williamboman/mason-lspconfig.nvim",
     cmd = { "LspInstall", "LspUninstall" },
     config = function()
@@ -34,11 +40,6 @@ local core_plugins = {
     end,
     event = "User FileOpened",
     lazy = true,
-  },
-
-  {
-    "lunarvim/lunar.nvim",
-    lazy = nvoid.colorscheme ~= "lunar",
   },
 
   { "nvim-lua/plenary.nvim", cmd = { "PlenaryBustedFile", "PlenaryBustedDirectory" }, lazy = true },

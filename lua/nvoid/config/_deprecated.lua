@@ -25,15 +25,6 @@ function M.handle()
   }
 
   ---@deprecated
-  nvoid.builtin.theme.options = {}
-  setmetatable(nvoid.builtin.theme.options, {
-    __newindex = function(_, k, v)
-      deprecate("nvoid.builtin.theme.options." .. k, "Use `nvoid.builtin.theme.<theme>.options` instead")
-      nvoid.builtin.theme.tokyonight.options[k] = v
-    end,
-  })
-
-  ---@deprecated
   nvoid.builtin.notify = {}
   setmetatable(nvoid.builtin.notify, {
     __newindex = function(_, k, _)

@@ -1,7 +1,6 @@
 local M = {}
 
 local builtins = {
-  "nvoid.plugins.config.theme",
   "nvoid.plugins.config.which-key",
   "nvoid.plugins.config.gitsigns",
   "nvoid.plugins.config.cmp",

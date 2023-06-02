@@ -1,16 +1,17 @@
 local M = {
   banner = {
     "",
-    [[    __                          _    ___         ]],
-    [[   / /   __  ______  ____ _____| |  / (_)___ ___ ]],
-    [[  / /   / / / / __ \/ __ `/ ___/ | / / / __ `__ \]],
-    [[ / /___/ /_/ / / / / /_/ / /   | |/ / / / / / / /]],
-    [[/_____/\__,_/_/ /_/\__,_/_/    |___/_/_/ /_/ /_/ ]],
+    [[  _   ___      ______ _____ _____   ]],
+    [[ | \ | \ \    / / __ \_   _|  __ \  ]],
+    [[ |  \| |\ \  / / |  | || | | |  | | ]],
+    [[ | . ` | \ \/ /| |  | || | | |  | | ]],
+    [[ | |\  |  \  / | |__| || |_| |__| | ]],
+    [[ |_| \_|   \/   \____/_____|_____/  ]],
   },
 }
 
 local fmt = string.format
-local text = require "nvoid.interface.text"
+local text = require "nvoid.ui.text"
 local lsp_utils = require "nvoid.lsp.utils"
 
 local function str_list(list)
@@ -210,7 +211,7 @@ function M.toggle_popup(ft)
     tbl_set_highlight(require("nvoid.lsp.null-ls.code_actions").list_registered(ft), "NvoidInfoIdentifier")
   end
 
-  local Popup = require("nvoid.interface.popup"):new {
+  local Popup = require("nvoid.ui.popup"):new {
     win_opts = { number = false },
     buf_opts = { modifiable = false, filetype = "lspinfo" },
   }
@@ -219,4 +220,5 @@ function M.toggle_popup(ft)
 
   return Popup
 end
+
 return M
