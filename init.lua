@@ -21,4 +21,4 @@ Log:debug "Starting Nvoid"
 
 local commands = require "nvoid.core.commands"
 commands.load(commands.defaults)
-require("nvoid.ui")
+-- require("nvoid.ui")

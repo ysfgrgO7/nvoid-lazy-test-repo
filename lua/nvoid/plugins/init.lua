@@ -5,12 +5,12 @@ local core_plugins = {
     lazy = true,
     dependencies = { "mason-lspconfig.nvim", "nlsp-settings.nvim" },
   },
-  {
-    "nvoid-lua/base16",
-    config = function()
-      require("base16").load_theme()
-    end,
-  },
+  -- {
+  --   "nvoid-lua/base16",
+  --   config = function()
+  --     require("base16").load_theme()
+  --   end,
+  -- },
   {
     "williamboman/mason-lspconfig.nvim",
     cmd = { "LspInstall", "LspUninstall" },
