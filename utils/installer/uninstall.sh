@@ -66,23 +66,12 @@ function remove_nvoid_bin() {
   rm -f "$nvoid_bin"
 }
 
-function remove_desktop_file() {
-  OS="$(uname -s)"
-  # TODO: Any other OSes that use desktop files?
-  ([ "$OS" != "Linux" ] || ! command -v xdg-desktop-menu &>/dev/null) && return
-  echo "Removing desktop file..."
-
-  find "$XDG_DATA_HOME/icons/hicolor" -name "nvoid.svg" -type f -delete
-  xdg-desktop-menu uninstall nvoid.desktop
-}
-
 function main() {
   parse_arguments "$@"
   echo "Removing Nvoid binary..."
   remove_nvoid_bin
   echo "Removing Nvoid directories..."
   remove_nvoid_dirs
-  remove_desktop_file
   echo "Uninstalled Nvoid!"
 }
 
