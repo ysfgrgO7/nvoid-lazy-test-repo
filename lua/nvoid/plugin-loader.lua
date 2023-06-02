@@ -10,20 +10,19 @@ function plugin_loader.init(opts)
   opts = opts or {}
 
   local lazy_install_dir = opts.install_path
-      or join_paths(vim.fn.stdpath "data", "site", "pack", "lazy", "opt", "lazy.nvim")
+    or join_paths(vim.fn.stdpath "data", "site", "pack", "lazy", "opt", "lazy.nvim")
 
   if not utils.is_directory(lazy_install_dir) then
     print "Initializing first time setup"
     local core_plugins_dir = join_paths(get_nvoid_base_dir(), "plugins")
     if utils.is_directory(core_plugins_dir) then
       vim.fn.mkdir(plugins_dir, "p")
-      vim.loop.fs_rmdir(plugins_dir)
+      vim.fn.delete(plugins_dir, "rf")
       require("nvoid.utils").fs_copy(core_plugins_dir, plugins_dir)
     else
       vim.fn.system {
         "git",
         "clone",
-        "--filter=blob:none",
         "--branch=stable",
         "https://github.com/folke/lazy.nvim.git",
         lazy_install_dir,
@@ -39,25 +38,29 @@ function plugin_loader.init(opts)
         snapshot["lazy.nvim"].commit,
       }
     end
+
+    vim.api.nvim_create_autocmd("User", { pattern = "LazyDone", callback = require("nvoid.lsp").setup })
   end
 
-  vim.opt.runtimepath:append(lazy_install_dir)
-  vim.opt.runtimepath:append(join_paths(plugins_dir, "*"))
+  local rtp = vim.opt.rtp:get()
+  local base_dir = (vim.env.NVOID_BASE_DIR or get_runtime_dir() .. "/nvoid"):gsub("\\", "/")
+  local idx_base = #rtp + 1
+  for i, path in ipairs(rtp) do
+    path = path:gsub("\\", "/")
+    if path == base_dir then
+      idx_base = i + 1
+      break
+    end
+  end
+  table.insert(rtp, idx_base, lazy_install_dir)
+  table.insert(rtp, idx_base + 1, join_paths(plugins_dir, "*"))
+  vim.opt.rtp = rtp
 
-  require("lazy.core.cache").setup {
-    performance = {
-      cache = {
-        enabled = true,
-        path = join_paths(get_cache_dir(), "lazy", "cache"),
-      },
-    },
-  }
-  -- HACK: Don't allow lazy to call setup second time
-  require("lazy.core.cache").setup = function() end
-end
-
-function plugin_loader.reset_cache()
-  os.remove(require("lazy.core.cache").config.path)
+  pcall(function()
+    -- set a custom path for lazy's cache
+    local lazy_cache = require "lazy.core.cache"
+    lazy_cache.path = join_paths(get_cache_dir(), "lazy", "luac")
+  end)
 end
 
 function plugin_loader.reload(spec)
@@ -99,29 +102,8 @@ function plugin_loader.load(configurations)
   vim.opt.runtimepath:remove(join_paths(plugins_dir, "*"))
 
   local status_ok = xpcall(function()
-    local opts = {
-      install = {
-        missing = true,
-      },
-      ui = {
-        border = "rounded",
-      },
-      root = plugins_dir,
-      git = {
-        timeout = 120,
-      },
-      lockfile = join_paths(get_config_dir(), "lazy-lock.json"),
-      performance = {
-        rtp = {
-          reset = false,
-        },
-      },
-      readme = {
-        root = join_paths(get_runtime_dir(), "lazy", "readme"),
-      },
-    }
-
-    lazy.setup(configurations, opts)
+    table.insert(nvoid.lazy.opts.install.colorscheme, 1, nvoid.colorscheme)
+    lazy.setup(configurations, nvoid.lazy.opts)
   end, debug.traceback)
 
   if not status_ok then
@@ -145,7 +127,7 @@ end
 function plugin_loader.sync_core_plugins()
   local core_plugins = plugin_loader.get_core_plugins()
   Log:trace(string.format("Syncing core plugins: [%q]", table.concat(core_plugins, ", ")))
-  require("lazy").sync { wait = true, plugins = core_plugins }
+  require("lazy").update { wait = true, plugins = core_plugins }
 end
 
 function plugin_loader.ensure_plugins()

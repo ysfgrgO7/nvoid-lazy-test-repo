@@ -1,12 +1,11 @@
 local M = {
   banner = {
     "",
-    [[  _   _            _     _ ]],
-    [[ | \ | |          (_)   | |]],
-    [[ |  \| |_   _____  _  __| |]],
-    [[ | . ` \ \ / / _ \| |/ _` |]],
-    [[ | |\  |\ V / (_) | | (_| |]],
-    [[ |_| \_| \_/ \___/|_|\__,_|]],
+    [[    __                          _    ___         ]],
+    [[   / /   __  ______  ____ _____| |  / (_)___ ___ ]],
+    [[  / /   / / / / __ \/ __ `/ ___/ | / / / __ `__ \]],
+    [[ / /___/ /_/ / / / / /_/ / /   | |/ / / / / / / /]],
+    [[/_____/\__,_/_/ /_/\__,_/_/    |___/_/_/ /_/ /_/ ]],
   },
 }
 
@@ -26,8 +25,8 @@ local function make_formatters_info(ft)
     "Formatters info",
     fmt(
       "* Active: %s%s",
-      table.concat(registered_formatters, "  , "),
-      vim.tbl_count(registered_formatters) > 0 and "  " or ""
+      table.concat(registered_formatters, " " .. nvoid.icons.ui.BoxChecked .. " , "),
+      vim.tbl_count(registered_formatters) > 0 and " " .. nvoid.icons.ui.BoxChecked .. " " or ""
     ),
     fmt("* Supported: %s", str_list(supported_formatters)),
   }
@@ -42,8 +41,8 @@ local function make_code_actions_info(ft)
     "Code actions info",
     fmt(
       "* Active: %s%s",
-      table.concat(registered_actions, "  , "),
-      vim.tbl_count(registered_actions) > 0 and "  " or ""
+      table.concat(registered_actions, " " .. nvoid.icons.ui.BoxChecked .. " , "),
+      vim.tbl_count(registered_actions) > 0 and " " .. nvoid.icons.ui.BoxChecked .. " " or ""
     ),
   }
 
@@ -58,8 +57,8 @@ local function make_linters_info(ft)
     "Linters info",
     fmt(
       "* Active: %s%s",
-      table.concat(registered_linters, "  , "),
-      vim.tbl_count(registered_linters) > 0 and "  " or ""
+      table.concat(registered_linters, " " .. nvoid.icons.ui.BoxChecked .. " , "),
+      vim.tbl_count(registered_linters) > 0 and " " .. nvoid.icons.ui.BoxChecked .. " " or ""
     ),
     fmt("* Supported: %s", str_list(supported_linters)),
   }
@@ -203,7 +202,7 @@ function M.toggle_popup(ft)
     vim.fn.matchadd("NvoidInfoIdentifier", " " .. ft .. "$")
     vim.fn.matchadd("string", "true")
     vim.fn.matchadd("string", "active")
-    vim.fn.matchadd("string", "")
+    vim.fn.matchadd("string", nvoid.icons.ui.BoxChecked)
     vim.fn.matchadd("boolean", "inactive")
     vim.fn.matchadd("error", "false")
     tbl_set_highlight(require("nvoid.lsp.null-ls.formatters").list_registered(ft), "NvoidInfoIdentifier")
@@ -220,5 +219,4 @@ function M.toggle_popup(ft)
 
   return Popup
 end
-
 return M

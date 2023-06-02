@@ -4,18 +4,20 @@ set -eo pipefail
 OS="$(uname -s)"
 
 #Set branch to master unless specified by the user
-declare -x LV_BRANCH="${LV_BRANCH:-"main"}"
-declare -xr LV_REMOTE="${LV_REMOTE:-ysfgrgO7/nvoid-lazy-test-repo.git}"
+declare -x LV_BRANCH="${LV_BRANCH:-"master"}"
+declare -xr LV_REMOTE="${LV_REMOTE:-nvoid/nvoid.git}"
 declare -xr INSTALL_PREFIX="${INSTALL_PREFIX:-"$HOME/.local"}"
 
 declare -xr XDG_DATA_HOME="${XDG_DATA_HOME:-"$HOME/.local/share"}"
 declare -xr XDG_CACHE_HOME="${XDG_CACHE_HOME:-"$HOME/.cache"}"
 declare -xr XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"$HOME/.config"}"
 
+declare -xr NVIM_APPNAME="${NVIM_APPNAME:-"nvoid"}"
+
 declare -xr NVOID_RUNTIME_DIR="${NVOID_RUNTIME_DIR:-"$XDG_DATA_HOME/nvoid"}"
-declare -xr NVOID_CONFIG_DIR="${NVOID_CONFIG_DIR:-"$XDG_CONFIG_HOME/nvoid"}"
-declare -xr NVOID_CACHE_DIR="${NVOID_CACHE_DIR:-"$XDG_CACHE_HOME/nvoid"}"
-declare -xr NVOID_BASE_DIR="${NVOID_BASE_DIR:-"$NVOID_RUNTIME_DIR/nvoid"}"
+declare -xr NVOID_CONFIG_DIR="${NVOID_CONFIG_DIR:-"$XDG_CONFIG_HOME/$NVIM_APPNAME"}"
+declare -xr NVOID_CACHE_DIR="${NVOID_CACHE_DIR:-"$XDG_CACHE_HOME/$NVIM_APPNAME"}"
+declare -xr NVOID_BASE_DIR="${NVOID_BASE_DIR:-"$NVOID_RUNTIME_DIR/$NVIM_APPNAME"}"
 
 declare -xr NVOID_LOG_LEVEL="${NVOID_LOG_LEVEL:-warn}"
 
@@ -31,7 +33,6 @@ declare INTERACTIVE_MODE=1
 declare ADDITIONAL_WARNINGS=""
 
 declare -a __nvoid_dirs=(
-  "$NVOID_CONFIG_DIR"
   "$NVOID_RUNTIME_DIR"
   "$NVOID_CACHE_DIR"
   "$NVOID_BASE_DIR"
@@ -39,8 +40,11 @@ declare -a __nvoid_dirs=(
 
 declare -a __npm_deps=(
   "neovim"
-  "tree-sitter-cli"
 )
+# treesitter installed with brew causes conflicts #3738
+if ! command -v tree-sitter &>/dev/null; then
+  __npm_deps+=("tree-sitter-cli")
+fi
 
 declare -a __pip_deps=(
   "pynvim"
@@ -131,13 +135,13 @@ function main() {
 
   if [ "$ARGS_INSTALL_DEPENDENCIES" -eq 1 ]; then
     if [ "$INTERACTIVE_MODE" -eq 1 ]; then
-      if confirm "Would you like to install Nvoid's NodeJS dependencies: $(stringify_array ${__npm_deps[@]})?"; then
+      if confirm "Would you like to install Nvoid's NodeJS dependencies: $(stringify_array "${__npm_deps[@]}")?"; then
         install_nodejs_deps
       fi
-      if confirm "Would you like to install Nvoid's Python dependencies: $(stringify_array ${__pip_deps[@]})?"; then
+      if confirm "Would you like to install Nvoid's Python dependencies: $(stringify_array "${__pip_deps[@]}")?"; then
         install_python_deps
       fi
-      if confirm "Would you like to install Nvoid's Rust dependencies: $(stringify_array ${__rust_deps[@]})?"; then
+      if confirm "Would you like to install Nvoid's Rust dependencies: $(stringify_array "${__rust_deps[@]}")?"; then
         install_rust_deps
       fi
     else
@@ -161,7 +165,7 @@ function main() {
 
   msg "$ADDITIONAL_WARNINGS"
   msg "Thank you for installing Nvoid!!"
-  echo "You can start it by running: $INSTALL_PREFIX/bin/nvoid"
+  echo "You can start it by running: $INSTALL_PREFIX/bin/$NVIM_APPNAME"
   echo "Do not forget to use a font with glyphs (icons) support [https://github.com/ryanoasis/nerd-fonts]"
 }
 
@@ -383,6 +387,7 @@ function verify_nvoid_dirs() {
     fi
     mkdir -p "$dir"
   done
+  mkdir -p "$NVOID_CONFIG_DIR"
 }
 
 function clone_nvoid() {
@@ -425,17 +430,32 @@ function setup_nvoid() {
 
   setup_shim
 
+  create_desktop_file
 
   [ ! -f "$NVOID_CONFIG_DIR/config.lua" ] \
     && cp "$NVOID_BASE_DIR/utils/installer/config.example.lua" "$NVOID_CONFIG_DIR/config.lua"
 
   echo "Preparing Lazy setup"
 
-  "$INSTALL_PREFIX/bin/nvoid" --headless -c 'quitall'
+  "$INSTALL_PREFIX/bin/$NVIM_APPNAME" --headless -c 'quitall'
 
-  echo "Lazy setup complete"
+  printf "\nLazy setup complete"
 
   verify_core_plugins
+}
+
+function create_desktop_file() {
+  # TODO: Any other OSes that use desktop files?
+  ([ "$OS" != "Linux" ] || ! command -v xdg-desktop-menu &>/dev/null) && return
+  echo "Creating desktop file"
+
+  for d in "$NVOID_BASE_DIR"/utils/desktop/*/; do
+    size_folder=$(basename "$d")
+    mkdir -p "$XDG_DATA_HOME/icons/hicolor/$size_folder/apps/"
+    cp "$NVOID_BASE_DIR/utils/desktop/$size_folder/nvoid.svg" "$XDG_DATA_HOME/icons/hicolor/$size_folder/apps"
+  done
+
+  xdg-desktop-menu install --novendor "$NVOID_BASE_DIR/utils/desktop/nvoid.desktop" || true
 }
 
 function print_logo() {
